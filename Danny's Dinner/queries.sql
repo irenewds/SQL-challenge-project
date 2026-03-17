@@ -17,9 +17,24 @@ FROM sales
 GROUP BY customer_id;
 
 -- 3. What was the first item from the menu purchased by each customer?
-
+SELECT 
+    s.customer_id,
+    m.product_name
+FROM sales s
+JOIN menu m
+    ON s.product_id = m.product_id
+JOIN (
+    SELECT 
+        customer_id,
+        MIN(order_date) AS first_order
+    FROM sales
+    GROUP BY customer_id
+) first_orders
+    ON s.customer_id = first_orders.customer_id
+    AND s.order_date = first_orders.first_order;
 
 -- 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
+
 -- 5. Which item was the most popular for each customer?
 -- 6. Which item was purchased first by the customer after they became a member?
 -- 7. Which item was purchased just before the customer became a member?
