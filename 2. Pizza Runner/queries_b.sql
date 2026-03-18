@@ -5,13 +5,36 @@ USE pizza_runner;
 -- 1. How many runners signed up for each 1 week period? (i.e. week starts 2021-01-01)
 
 -- 2. What was the average time in minutes it took for each runner to arrive at the Pizza Runner HQ to pickup the order?
+SELECT
+    r.runner_id,
+    AVG(TIMESTAMPDIFF(MINUTE, c.order_time, r.pickup_time)) AS avg_arrival_time
+FROM runner_orders r
+INNER JOIN customer_orders c
+ON r.order_id = c.order_id
+GROUP BY r.runner_id
+ORDER BY r.runner_id;
 
 -- 3. Is there any relationship between the number of pizzas and how long the order takes to prepare?
 
 -- 4. What was the average distance travelled for each customer?
+SELECT
+    c.customer_id,
+    AVG(r.distance) AS avg_distance
+FROM customer_orders c
+INNER JOIN runner_orders r
+    ON c.order_id = r.order_id
+WHERE r.cancellation = ''
+GROUP BY c.customer_id;
 
 -- 5. What was the difference between the longest and shortest delivery times for all orders?
 
 -- 6. What was the average speed for each runner for each delivery and do you notice any trend for these values?
 
 -- 7. What is the successful delivery percentage for each runner?
+SELECT
+    runner_id,
+    ROUND(100 * SUM(
+        CASE WHEN cancellation = '' THEN 1 
+        ELSE 0 END) / COUNT(*), 2) AS success_percentage
+FROM runner_orders
+GROUP BY runner_id;

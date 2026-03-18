@@ -56,6 +56,8 @@ ORDER BY pizza_delivered DESC
 LIMIT 1;
 
 -- 7. For each customer, how many delivered pizzas had at least 1 change and how many had no changes?
+SELECT *
+FROM customer_orders;
 
 -- 8. How many pizzas were delivered that had both exclusions and extras?
 
