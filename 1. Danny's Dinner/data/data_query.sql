@@ -1,6 +1,6 @@
 USE dannys_diner;
 
-
+-- Table 1: sales
 CREATE TABLE sales (
   customer_id VARCHAR(1),
   order_date DATE,
@@ -27,6 +27,7 @@ VALUES
   ('C', '2021-01-07', 3);
 
 
+-- Table 2: menu
 CREATE TABLE menu (
   product_id INT,
   product_name VARCHAR(5),
@@ -41,6 +42,7 @@ VALUES
   (3, 'ramen', 12);
 
 
+-- Table 3: members
 CREATE TABLE members (
   customer_id VARCHAR(1),
   join_date DATE
