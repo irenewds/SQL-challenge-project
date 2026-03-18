@@ -3,6 +3,20 @@ USE pizza_runner;
 -- D. Pricing and Ratings
 
 -- 1. If a Meat Lovers pizza costs $12 and Vegetarian costs $10 and there were no charges for changes - how much money has Pizza Runner made so far if there are no delivery fees?
+WITH price_cte AS (
+SELECT 
+    c.pizza_id,
+    CASE 
+        WHEN c.pizza_id = 1 THEN 12
+        ELSE 10 END AS price
+FROM runner_orders r
+INNER JOIN customer_orders c
+    ON r.order_id = c.order_id
+    AND r.cancellation = ''
+)
+
+SELECT SUM(price) AS total_earning
+FROM price_cte;
 
 -- 2. What if there was an additional $1 charge for any pizza extras? Add cheese is $1 extra
 

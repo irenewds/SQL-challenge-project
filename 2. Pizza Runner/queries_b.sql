@@ -23,12 +23,14 @@ SELECT
 FROM customer_orders c
 INNER JOIN runner_orders r
     ON c.order_id = r.order_id
-WHERE r.cancellation = ''
+    AND r.cancellation = ''
 GROUP BY c.customer_id;
 
 -- 5. What was the difference between the longest and shortest delivery times for all orders?
 
 -- 6. What was the average speed for each runner for each delivery and do you notice any trend for these values?
+SELECT *
+FROM runner_orders;
 
 -- 7. What is the successful delivery percentage for each runner?
 SELECT

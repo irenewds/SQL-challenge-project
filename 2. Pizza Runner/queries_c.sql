@@ -5,6 +5,8 @@ USE pizza_runner;
 -- 1. What are the standard ingredients for each pizza?
 
 -- 2. What was the most commonly added extra?
+SELECT *
+FROM customer_orders;
 
 -- 3. What was the most common exclusion?
 
