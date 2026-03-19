@@ -36,3 +36,12 @@ SET
               WHEN cancellation IS NULL OR cancellation = 'null' THEN '' 
               ELSE cancellation 
            END;
+
+UPDATE runner_orders
+SET duration = CASE
+    WHEN duration IS NULL OR duration = '' THEN NULL
+    ELSE REGEXP_REPLACE(duration, '[^0-9]', '')
+END;
+
+ALTER TABLE runner_orders
+MODIFY duration INT;
