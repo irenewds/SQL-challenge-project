@@ -21,6 +21,11 @@ GROUP BY r.runner_id
 ORDER BY r.runner_id;
 
 -- 3. Is there any relationship between the number of pizzas and how long the order takes to prepare?
+SELECT *
+FROM runner_orders;
+
+SELECT *
+FROM customer_orders;
 
 -- 4. What was the average distance travelled for each customer?
 SELECT
@@ -33,6 +38,11 @@ INNER JOIN runner_orders r
 GROUP BY c.customer_id;
 
 -- 5. What was the difference between the longest and shortest delivery times for all orders?
+SELECT
+    MIN(duration) AS min_delivery_time,
+    MAX(duration) AS max_delivery_time,
+    MAX(duration) - MIN(duration) AS dif_delivery_time
+FROM runner_orders;
 
 -- 6. What was the average speed for each runner for each delivery and do you notice any trend for these values?
 SELECT *
