@@ -21,11 +21,24 @@ GROUP BY r.runner_id
 ORDER BY r.runner_id;
 
 -- 3. Is there any relationship between the number of pizzas and how long the order takes to prepare?
+WITH pizza_count AS (
+    SELECT
+        c.order_id,
+        COUNT(c.order_id) as pizza_order,
+        c.order_time,
+        r.pickup_time,
+        TIMESTAMPDIFF(MINUTE, c.order_time, r.pickup_time) AS prep_time
+    FROM customer_orders c
+    INNER JOIN runner_orders r
+        ON c.order_id = r.order_id
+    WHERE r.cancellation = ''
+    GROUP BY c.order_id, c.order_time, r.pickup_time
+)
 SELECT
-    order_id,
-    COUNT(pizza_id) AS pizza_count
-FROM customer_orders
-GROUP BY order_id;
+    pizza_order,
+    AVG(prep_time) AS avg_prep_time
+FROM pizza_count
+GROUP BY pizza_order;
 
 -- 4. What was the average distance travelled for each customer?
 SELECT
@@ -45,8 +58,14 @@ SELECT
 FROM runner_orders;
 
 -- 6. What was the average speed for each runner for each delivery and do you notice any trend for these values?
-SELECT *
-FROM runner_orders;
+SELECT 
+    runner_id,
+    order_id, 
+    round(AVG(distance*60/duration),2) as avg_speed 
+FROM runner_orders
+where cancellation = ""
+GROUP BY runner_id, order_id
+ORDER BY runner_id, order_id;
 
 -- 7. What is the successful delivery percentage for each runner?
 SELECT

@@ -84,7 +84,7 @@ INNER JOIN members
     ON sales.customer_id = members.customer_id
 INNER JOIN menu
     ON sales.product_id = menu.product_id
-WHERE members.join_date <= sales.order_date;
+WHERE members.join_date <= sales.order_date
 )
 
 SELECT

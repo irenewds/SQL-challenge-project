@@ -1,8 +1,6 @@
 USE pizza_runner;
 
 -- A. Pizza Metrics
-SELECT *
-FROM customer_orders
 
 -- 1. How many pizzas were ordered?
 SELECT COUNT(pizza_id) as pizza_order_count
