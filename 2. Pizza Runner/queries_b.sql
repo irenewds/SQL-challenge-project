@@ -21,11 +21,11 @@ GROUP BY r.runner_id
 ORDER BY r.runner_id;
 
 -- 3. Is there any relationship between the number of pizzas and how long the order takes to prepare?
-SELECT *
-FROM runner_orders;
-
-SELECT *
-FROM customer_orders;
+SELECT
+    order_id,
+    COUNT(pizza_id) AS pizza_count
+FROM customer_orders
+GROUP BY order_id;
 
 -- 4. What was the average distance travelled for each customer?
 SELECT
