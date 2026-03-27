@@ -1,9 +1,5 @@
 USE foodie_fi;
 
-SELECT *
-FROM plans;
-SELECT *
-FROM subscriptions;
 
 -- B. Data Analysis Questions
 
@@ -95,7 +91,7 @@ SELECT
         SUM(COUNT(*)) OVER (),
     1) AS percentage
 FROM ordered
-WHERE rn = 2   -- first plan after trial
+WHERE rn = 2
 GROUP BY plan_name;
 
 -- 7. What is the customer count and percentage breakdown of all 5 plan_name values at 2020-12-31?
