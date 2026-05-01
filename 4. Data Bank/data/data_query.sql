@@ -3536,7 +3536,7 @@ SELECT *
 FROM customer_nodes;
 
 -- Table 3: Customer Transactions
-CREATE TABLE customer_transactions (
+CREATE TABLE data_bank.customer_transactions (
   customer_id INTEGER,
   txn_date DATE,
   txn_type VARCHAR(10),
