@@ -1,10 +1,5 @@
 USE balanced_tree;
 
-SELECT *
-FROM product_details;
-SELECT *
-FROM sales;
-
 -- A. High Level Sales Analysis
 
 -- 1. What was the total quantity sold for all products?
