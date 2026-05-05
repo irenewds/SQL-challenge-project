@@ -81,7 +81,6 @@ SELECT
 FROM checkout;
 
 -- 7. What are the top 3 pages by number of views?
-
 SELECT
     e.page_id AS page_id,
     p.page_name AS page_name,
@@ -97,7 +96,14 @@ ORDER BY top_views_count DESC
 LIMIT 3;
 
 -- 8. What is the number of views and cart adds for each product category?
-SELECT *
-FROM events;
+SELECT
+  ph.product_category,
+  SUM(CASE WHEN e.event_type = 1 THEN 1 ELSE 0 END) as page_views,
+  SUM(CASE WHEN e.event_type = 2 THEN 1 ELSE 0 END) as cart_adds
+FROM events e
+JOIN page_hierarchy ph
+  ON e.page_id = ph.page_id
+WHERE ph.product_category IS NOT NULL
+GROUP BY ph.product_category;
 
 -- 9. What are the top 3 products by purchases?
