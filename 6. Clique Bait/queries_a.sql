@@ -1,17 +1,4 @@
-USE clique_bait;
-
-SELECT *
-FROM event_identifier;
-SELECT *
-FROM campaign_identifier;
-SELECT *
-FROM page_hierarchy;
-SELECT *
-FROM users
-LIMIT 10;
-SELECT *
-FROM events
-LIMIT 10;
+USE clique_bait
 
 -- A. Digital Analysis
 -- Using the available datasets - answer the following questions using a single query for each one:

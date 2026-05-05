@@ -1,5 +1,18 @@
 USE clique_bait;
 
+SELECT *
+FROM event_identifier;
+SELECT *
+FROM campaign_identifier;
+SELECT *
+FROM page_hierarchy;
+SELECT *
+FROM users
+LIMIT 10;
+SELECT *
+FROM events
+LIMIT 10;
+
 -- B. Product Funnel Analysis
 
 -- Using a single SQL query - create a new output table which has the following details:
@@ -7,6 +20,7 @@ USE clique_bait;
 -- How many times was each product added to cart?
 -- How many times was each product added to a cart but not purchased (abandoned)?
 -- How many times was each product purchased?
+
 
 -- Additionally, create another table which further aggregates the data for the above points but this time for each product category instead of individual products.
 -- Use your 2 new output tables - answer the following questions:
