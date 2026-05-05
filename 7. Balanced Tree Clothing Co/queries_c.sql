@@ -168,5 +168,28 @@ JOIN total_revenue tr
 ORDER BY revenue_percentage DESC;
 
 -- 9. What is the total transaction “penetration” for each product? (hint: penetration = number of transactions where at least 1 quantity of a product was purchased divided by total number of transactions)
+WITH total_transactions AS (
+    SELECT COUNT(DISTINCT txn_id) AS total_txns
+    FROM balanced_tree.sales
+),
+product_transactions AS (
+    SELECT
+        pd.product_name,
+        COUNT(DISTINCT s.txn_id) AS product_txns
+    FROM balanced_tree.sales s
+    JOIN balanced_tree.product_details pd
+        ON s.prod_id = pd.product_id
+    WHERE s.qty > 0
+    GROUP BY pd.product_name
+)
+
+SELECT
+    pt.product_name,
+    pt.product_txns,
+    tt.total_txns,
+    ROUND((pt.product_txns / tt.total_txns) * 100, 2) AS penetration_percentage
+FROM product_transactions pt
+JOIN total_transactions tt
+ORDER BY penetration_percentage DESC;
 
 -- 10. What is the most common combination of at least 1 quantity of any 3 products in a 1 single transaction?
