@@ -44,7 +44,7 @@ SELECT
     SUM(CASE WHEN index_value IS NULL THEN 1 ELSE 0 END) AS index_value_nulls,
     SUM(CASE WHEN ranking IS NULL THEN 1 ELSE 0 END) AS rank_nulls,
     SUM(CASE WHEN percentile_ranking IS NULL THEN 1 ELSE 0 END) AS percentile_rank_nulls
-FROM fresh_segments.interest_metrics;
+FROM interest_metrics;
 
 -- Then, let's compare the amount to the entire dataset.
 SELECT
@@ -64,20 +64,20 @@ WHERE month_year IS NULL
 -- 4. How many interest_id values exist in the fresh_segments.interest_metrics table but not in the fresh_segments.interest_map table? What about the other way around?
 SELECT
     (
-        SELECT COUNT(DISTINCT im.interest_id)
-        FROM interest_metrics im
-        LEFT JOIN interest_map mp
-            ON im.interest_id = mp.id
-        WHERE im.interest_id IS NOT NULL
-          AND mp.id IS NULL
+        SELECT COUNT(DISTINCT met.interest_id)
+        FROM interest_metrics met
+        LEFT JOIN interest_map map
+            ON met.interest_id = map.id
+        WHERE met.interest_id IS NOT NULL
+          AND map.id IS NULL
     ) AS metrics_not_in_map,
 
     (
-        SELECT COUNT(DISTINCT mp.id)
-        FROM interest_map mp
-        LEFT JOIN interest_metrics im
-            ON mp.id = im.interest_id
-        WHERE im.interest_id IS NULL
+        SELECT COUNT(DISTINCT map.id)
+        FROM interest_map map
+        LEFT JOIN interest_metrics met
+            ON map.id = met.interest_id
+        WHERE met.interest_id IS NULL
     ) AS map_not_in_metrics;
 
 -- 5. Summarise the id values in the fresh_segments.interest_map by its total record count in this table
@@ -93,6 +93,22 @@ ORDER BY record_count DESC
 LIMIT 10;
 
 -- 6. What sort of table join should we perform for our analysis and why? Check your logic by checking the rows where interest_id = 21246 in your joined output and include all columns from fresh_segments.interest_metrics and all columns from fresh_segments.interest_map except from the id column.
--- 
+-- We are gonna use 'INNER JOIN' with the base table being interest_metrics
+SELECT
+    met.*,
+    map.interest_name,
+    map.interest_summary,
+    map.created_at,
+    map.last_modified
+FROM fresh_segments.interest_metrics met
+INNER JOIN fresh_segments.interest_map map
+    ON met.interest_id = map.id
+WHERE met.interest_id = 21246;
 
 -- 7. Are there any records in your joined table where the month_year value is before the created_at value from the fresh_segments.interest_map table? Do you think these values are valid and why?
+SELECT
+    COUNT(*) AS invalid_records
+FROM fresh_segments.interest_map AS map
+INNER JOIN fresh_segments.interest_metrics AS met
+    ON map.id = met.interest_id
+WHERE met.month_year < CAST(map.created_at AS DATE);
