@@ -9,7 +9,6 @@ SELECT *
 FROM customer_transactions
 LIMIT 10;
 
-
 -- A. Customer Nodes Exploration
 
 -- 1. How many unique nodes are there on the Data Bank system?
@@ -35,5 +34,20 @@ JOIN regions r
 GROUP BY region;
 
 -- 4. How many days on average are customers reallocated to a different node?
+WITH node_durations AS (
+    SELECT
+        customer_id,
+        node_id,
+        region_id,
+        start_date,
+        end_date,
+        DATEDIFF(end_date, start_date) AS days_in_node
+    FROM customer_nodes
+    WHERE end_date <> '9999-12-31'
+)
+
+SELECT
+    ROUND(AVG(days_in_node)) AS avg_reallocation_days
+FROM node_durations;
 
 -- 5. What is the median, 80th and 95th percentile for this same reallocation days metric for each region?
