@@ -1,14 +1,5 @@
 USE data_bank;
 
-SELECT *
-FROM regions;
-SELECT *
-FROM customer_nodes
-LIMIT 10;
-SELECT *
-FROM customer_transactions
-LIMIT 10;
-
 -- A. Customer Nodes Exploration
 
 -- 1. How many unique nodes are there on the Data Bank system?
