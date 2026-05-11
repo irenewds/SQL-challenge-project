@@ -1,5 +1,9 @@
 USE data_mart;
 
+SELECT *
+FROM clean_weekly_sales
+LIMIT 10;
+
 -- C. Before & After Analysis
 
 -- This technique is usually used when we inspect an important event and want to inspect the impact before and after a certain point in time.
