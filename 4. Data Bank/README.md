@@ -23,6 +23,9 @@ SELECT COUNT(DISTINCT node_id) AS unique_node
 FROM customer_nodes;
 ```
 **Result**
+| unique_node |
+|-------------|
+| 5         |
 
 ### Question 2
 What is the number of nodes per region?
@@ -36,6 +39,13 @@ JOIN regions r
 GROUP BY region;
 ```
 **Result**
+| region |number_of_nodes |
+|-------------|-------------|
+| Africa         | 5         |
+| America         | 5         |
+| Asia         | 5         |
+| Australia         | 5         |
+| Europe         | 5         |
 
 ### Question 3
 How many customers are allocated to each region?
@@ -49,6 +59,13 @@ JOIN regions r
 GROUP BY region;
 ```
 **Result**
+| region |total_customers |
+|-------------|-------------|
+| Africa         | 102         |
+| America         | 105         |
+| Asia         | 95         |
+| Australia         | 110         |
+| Europe         | 88         |
 
 ### Question 4
 How many days on average are customers reallocated to a different node?
@@ -70,6 +87,9 @@ SELECT
 FROM node_durations;
 ```
 **Result**
+| avg_reallocation_days |
+|-------------|
+| 15         |
 
 ### Question 5
 What is the median, 80th and 95th percentile for this same reallocation days metric for each region?
@@ -89,6 +109,11 @@ FROM customer_transactions
 GROUP BY txn_type;
 ```
 **Result**
+| txn_type | unique_count | total_amount |
+|-------------|-------------|-------------|
+| deposit        | 2671   | 1359168         |
+| withdrawal     | 1580   | 793003         |
+| purchase       | 1617   | 806537         |
 
 ### Question 2
 What is the average total historical deposit counts and amounts for all customers?
@@ -109,6 +134,9 @@ SELECT
 FROM deposits;
 ```
 **Result**
+| average_count | average_amount |
+|-------------|-------------|
+| 5        | 2718   |
 
 ### Question 3
 For each month - how many Data Bank customers make more than 1 deposit and either 1 purchase or 1 withdrawal in a single month?
@@ -132,6 +160,12 @@ GROUP BY month_number
 ORDER BY month_number;
 ```
 **Result**
+| month_number | customer_count |
+|-------------|-------------|
+| 1        | 168   |
+| 2        | 181   |
+| 3        | 192   |
+| 4        | 70   |
 
 ### Question 4
 What is the closing balance for each customer at the end of the month?
@@ -164,6 +198,19 @@ FROM monthly_transactions
 ORDER BY customer_id, year_number, month_number;
 ```
 **Result**
+*Only first ten rows shown*
+| customer_id | year_number | month_number | closing_balance |
+|-------------|-------------|
+| 1        | 2020   | 1   | 312   |
+| 1        | 2020   | 3   | -640   |
+| 2        | 2020   | 1   | 549   |
+| 2        | 2020   | 3   | 610   |
+| 3        | 2020   | 1   | 144   |
+| 3        | 2020   | 2   | -821   |
+| 3        | 2020   | 3   | -1222   |
+| 3        | 2020   | 4   | -729   |
+| 4        | 2020   | 1   | 848   |
+| 4        | 2020   | 3   | 655   |
 
 ### Question 5
 What is the percentage of customers who increase their closing balance by more than 5%?
