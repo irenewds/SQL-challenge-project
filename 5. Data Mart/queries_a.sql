@@ -1,9 +1,5 @@
 USE data_mart;
 
-SELECT *
-FROM data_mart.weekly_sales
-LIMIT 10;
-
 -- A. Data Cleansing Steps
 
 -- In a single query, perform the following operations and generate a new table in the data_mart schema named clean_weekly_sales:

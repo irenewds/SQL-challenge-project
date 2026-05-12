@@ -1,9 +1,5 @@
 USE data_mart;
 
-SELECT *
-FROM clean_weekly_sales
-LIMIT 10;
-
 -- B. Data Exploration
 
 -- 1. What day of the week is used for each week_date value?
