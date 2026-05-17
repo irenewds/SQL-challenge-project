@@ -94,8 +94,48 @@ FROM node_durations;
 ### Question 5
 What is the median, 80th and 95th percentile for this same reallocation days metric for each region?
 ```sql
+WITH reallocation_days AS (
+    SELECT
+        cn.region_id,
+        r.region_name,
+        DATEDIFF(cn.end_date, cn.start_date) AS days_reallocated
+    FROM customer_nodes cn
+    JOIN regions r ON r.region_id = cn.region_id
+    WHERE cn.end_date != '9999-12-31'
+),
+ranked AS (
+    SELECT
+        region_id, region_name, days_reallocated,
+        ROW_NUMBER() OVER (
+            PARTITION BY region_id ORDER BY days_reallocated
+        ) AS row_num,
+        COUNT(*) OVER (PARTITION BY region_id) AS total_rows
+    FROM reallocation_days
+),
+percentiles AS (
+    SELECT *,
+        CEIL(0.50 * total_rows) AS p50_idx,
+        CEIL(0.80 * total_rows) AS p80_idx,
+        CEIL(0.95 * total_rows) AS p95_idx
+    FROM ranked
+)
+SELECT
+    region_name,
+    MAX(CASE WHEN row_num = p50_idx THEN days_reallocated END) AS median_days,
+    MAX(CASE WHEN row_num = p80_idx THEN days_reallocated END) AS p80_days,
+    MAX(CASE WHEN row_num = p95_idx THEN days_reallocated END) AS p95_days
+FROM percentiles
+GROUP BY region_id, region_name
+ORDER BY region_name;
 ```
 **Result**
+| region_name | median_days | p80_days | p95_days |
+|-------------|-------------|-------------|-------------|
+| Africa     | 15   | 24    | 28         |
+| America    | 15   | 23    | 28         |
+| Asia       | 15   | 23    | 28         |
+| Australia  | 15   | 23    | 28         |
+| Europe     | 15   | 24    | 28         |
 
 ## B. Customer Transactions
 ### Question 1
@@ -200,7 +240,7 @@ ORDER BY customer_id, year_number, month_number;
 **Result**
 *Only first ten rows shown*
 | customer_id | year_number | month_number | closing_balance |
-|-------------|-------------|
+|-------------|-------------|-------------|-------------|
 | 1        | 2020   | 1   | 312   |
 | 1        | 2020   | 3   | -640   |
 | 2        | 2020   | 1   | 549   |
@@ -215,5 +255,56 @@ ORDER BY customer_id, year_number, month_number;
 ### Question 5
 What is the percentage of customers who increase their closing balance by more than 5%?
 ```sql
+WITH monthly_txn AS (
+    SELECT
+        customer_id,
+        DATE_FORMAT(txn_date, '%Y-%m-01') AS txn_month,
+        SUM(CASE
+            WHEN txn_type = 'deposit' THEN  txn_amount
+            ELSE -txn_amount
+        END) AS monthly_net
+    FROM customer_transactions
+    GROUP BY customer_id, DATE_FORMAT(txn_date, '%Y-%m-01')
+),
+running_balance AS (
+    SELECT
+        customer_id, txn_month,
+        SUM(monthly_net) OVER (
+            PARTITION BY customer_id ORDER BY txn_month
+            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+        ) AS closing_balance
+    FROM monthly_txn
+),
+first_last AS (
+    SELECT DISTINCT
+        customer_id,
+        FIRST_VALUE(closing_balance) OVER (
+            PARTITION BY customer_id ORDER BY txn_month
+            ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+        ) AS first_balance,
+        LAST_VALUE(closing_balance)  OVER (
+            PARTITION BY customer_id ORDER BY txn_month
+            ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+        ) AS last_balance
+    FROM running_balance
+),
+flagged AS (
+    SELECT
+        customer_id, first_balance, last_balance,
+        CASE
+            WHEN first_balance > 0
+             AND (last_balance - first_balance) / first_balance > 0.05
+            THEN 1 ELSE 0
+        END AS grew_over_5pct
+    FROM first_last
+)
+SELECT
+    COUNT(*) AS total_customers,
+    SUM(grew_over_5pct) AS customers_grew_over_5pct,
+    ROUND(100.0 * SUM(grew_over_5pct) / COUNT(*), 2) AS pct_customers
+FROM flagged;
 ```
 **Result**
+| total_customers | customers_grew_over_5pct | pct_customers |
+|-------------|-------------|-------------|
+| 500        | 117   | 23.40   | 
