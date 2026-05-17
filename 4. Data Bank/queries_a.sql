@@ -42,3 +42,36 @@ SELECT
 FROM node_durations;
 
 -- 5. What is the median, 80th and 95th percentile for this same reallocation days metric for each region?
+WITH reallocation_days AS (
+    SELECT
+        cn.region_id,
+        r.region_name,
+        DATEDIFF(cn.end_date, cn.start_date) AS days_reallocated
+    FROM customer_nodes cn
+    JOIN regions r ON r.region_id = cn.region_id
+    WHERE cn.end_date != '9999-12-31'
+),
+ranked AS (
+    SELECT
+        region_id, region_name, days_reallocated,
+        ROW_NUMBER() OVER (
+            PARTITION BY region_id ORDER BY days_reallocated
+        ) AS row_num,
+        COUNT(*) OVER (PARTITION BY region_id) AS total_rows
+    FROM reallocation_days
+),
+percentiles AS (
+    SELECT *,
+        CEIL(0.50 * total_rows) AS p50_idx,
+        CEIL(0.80 * total_rows) AS p80_idx,
+        CEIL(0.95 * total_rows) AS p95_idx
+    FROM ranked
+)
+SELECT
+    region_name,
+    MAX(CASE WHEN row_num = p50_idx THEN days_reallocated END) AS median_days,
+    MAX(CASE WHEN row_num = p80_idx THEN days_reallocated END) AS p80_days,
+    MAX(CASE WHEN row_num = p95_idx THEN days_reallocated END) AS p95_days
+FROM percentiles
+GROUP BY region_id, region_name
+ORDER BY region_name;

@@ -83,3 +83,51 @@ FROM monthly_transactions
 ORDER BY customer_id, year_number, month_number;
 
 -- 5. What is the percentage of customers who increase their closing balance by more than 5%?
+WITH monthly_txn AS (
+    SELECT
+        customer_id,
+        DATE_FORMAT(txn_date, '%Y-%m-01') AS txn_month,
+        SUM(CASE
+            WHEN txn_type = 'deposit' THEN  txn_amount
+            ELSE -txn_amount
+        END) AS monthly_net
+    FROM customer_transactions
+    GROUP BY customer_id, DATE_FORMAT(txn_date, '%Y-%m-01')
+),
+running_balance AS (
+    SELECT
+        customer_id, txn_month,
+        SUM(monthly_net) OVER (
+            PARTITION BY customer_id ORDER BY txn_month
+            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+        ) AS closing_balance
+    FROM monthly_txn
+),
+first_last AS (
+    SELECT DISTINCT
+        customer_id,
+        FIRST_VALUE(closing_balance) OVER (
+            PARTITION BY customer_id ORDER BY txn_month
+            ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+        ) AS first_balance,
+        LAST_VALUE(closing_balance)  OVER (
+            PARTITION BY customer_id ORDER BY txn_month
+            ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+        ) AS last_balance
+    FROM running_balance
+),
+flagged AS (
+    SELECT
+        customer_id, first_balance, last_balance,
+        CASE
+            WHEN first_balance > 0
+             AND (last_balance - first_balance) / first_balance > 0.05
+            THEN 1 ELSE 0
+        END AS grew_over_5pct
+    FROM first_last
+)
+SELECT
+    COUNT(*) AS total_customers,
+    SUM(grew_over_5pct) AS customers_grew_over_5pct,
+    ROUND(100.0 * SUM(grew_over_5pct) / COUNT(*), 2) AS pct_customers
+FROM flagged;
