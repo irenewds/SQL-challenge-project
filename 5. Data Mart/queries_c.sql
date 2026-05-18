@@ -76,3 +76,76 @@ FROM (
 ) summary;
 
 -- 3. How do the sale metrics for these 2 periods before and after compare with the previous years in 2018 and 2019?
+-- 4-week window
+WITH change_week AS (
+    SELECT WEEK('2020-06-15', 3) AS base_week
+),
+period_sales AS (
+    SELECT
+        calendar_year,
+        CASE
+            WHEN week_number BETWEEN
+                 (SELECT base_week - 4 FROM change_week)
+             AND (SELECT base_week - 1 FROM change_week) THEN 'before'
+            WHEN week_number BETWEEN
+                 (SELECT base_week     FROM change_week)
+             AND (SELECT base_week + 3 FROM change_week) THEN 'after'
+        END AS period,
+        SUM(sales) AS total_sales
+    FROM clean_weekly_sales
+    WHERE calendar_year IN (2018, 2019, 2020)
+    GROUP BY calendar_year, period
+    HAVING period IS NOT NULL
+),
+pivoted AS (
+    SELECT
+        calendar_year,
+        SUM(CASE WHEN period = 'before' THEN total_sales END) AS before_sales,
+        SUM(CASE WHEN period = 'after'  THEN total_sales END) AS after_sales
+    FROM period_sales
+    GROUP BY calendar_year
+)
+SELECT
+    calendar_year,
+    before_sales,
+    after_sales,
+    ROUND(100.0 * (after_sales - before_sales) / before_sales, 2) AS pct_change
+FROM pivoted
+ORDER BY calendar_year;
+
+-- 12-week window
+WITH change_week AS (
+    SELECT WEEK('2020-06-15', 3) AS base_week
+),
+period_sales_12 AS (
+    SELECT
+        calendar_year,
+        CASE
+            WHEN week_number BETWEEN
+                 (SELECT base_week - 12 FROM change_week)
+             AND (SELECT base_week -  1 FROM change_week) THEN 'before'
+            WHEN week_number BETWEEN
+                 (SELECT base_week      FROM change_week)
+             AND (SELECT base_week + 11 FROM change_week) THEN 'after'
+        END AS period,
+        SUM(sales) AS total_sales
+    FROM clean_weekly_sales
+    WHERE calendar_year IN (2018, 2019, 2020)
+    GROUP BY calendar_year, period
+    HAVING period IS NOT NULL
+),
+pivoted_12 AS (
+    SELECT
+        calendar_year,
+        SUM(CASE WHEN period = 'before' THEN total_sales END) AS before_sales,
+        SUM(CASE WHEN period = 'after'  THEN total_sales END) AS after_sales
+    FROM period_sales_12
+    GROUP BY calendar_year
+)
+SELECT
+    calendar_year,
+    before_sales,
+    after_sales,
+    ROUND(100.0 * (after_sales - before_sales) / before_sales, 2) AS pct_change
+FROM pivoted_12
+ORDER BY calendar_year;
